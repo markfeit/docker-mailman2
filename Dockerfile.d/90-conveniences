@@ -1,0 +1,10 @@
+#
+# Install and configure conveniences
+#
+
+# This will comaplain about not having access to systemd.  Ignore it.
+
+RUN microdnf -y install less tree procps
+
+# TODO: Remove this after development.
+VOLUME /work

@@ -1,0 +1,11 @@
+#
+# THIS FILE IS GENERATED.  DO NOT EDIT.
+#
+
+
+# Dockerfile Header for __NAME__
+
+FROM __FROM__
+LABEL maintainer "__MAINTAINER__"
+
+WORKDIR /container/__NAME__

@@ -1,0 +1,31 @@
+#!/bin/sh -e
+#
+# Prepare Mailman at build time
+#
+
+die()
+{
+    echo "$@" 1>&2
+    exit 1
+}
+
+for DIR in \
+    /etc/mailman \
+    /var/lib/mailman \
+    /var/lock/mailman \
+    /var/run/mailman \
+    /var/spool/mailman \
+    /var/log/httpd
+do
+    DIST="${DIR}-dist"
+    if [ ! -e "${DIST}" ]
+    then
+	mv "${DIR}" "${DIR}-dist"
+    else
+	echo "${DIR} has already been renamed."
+    fi
+done
+
+
+# Let the web server do mailman things
+usermod apache -G mailman

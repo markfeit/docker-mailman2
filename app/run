@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+echo This is the app.  Here\'s a shell.
+exec sh

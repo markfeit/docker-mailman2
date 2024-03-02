@@ -1,0 +1,6 @@
+# Cron
+
+[program:crond]
+command=/usr/sbin/crond -n
+user=root
+priority=90

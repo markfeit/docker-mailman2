@@ -1,0 +1,45 @@
+#!/bin/sh -e
+#
+# Docker Entry Point
+#
+
+# Canonicalize the location where the data lives
+RUNTIME=/mailman
+
+die()
+{
+    echo "$@" 1>&2
+    exit 1
+}
+
+echo "Setting up ${RUNTIME}"
+
+for DIR in \
+    /etc/mailman \
+    /var/lib/mailman \
+    /var/lock/mailman \
+    /var/run/mailman \
+    /var/spool/mailman \
+    /var/log/httpd
+do
+    DIST_DIR="${DIR}-dist"
+    RUNTIME_DIR="${RUNTIME}${DIR}"
+
+    [ -d "${DIST_DIR}" ] \
+	|| die "Can't find ${DIST_DIR}"
+
+    if [ ! -e "${RUNTIME_DIR}" ]
+    then
+	echo "Populating ${DIST_DIR} -> ${RUNTIME_DIR}"
+	mkdir -p $(dirname "${RUNTIME_DIR}")
+	cp -rpf "${DIST_DIR}" "${RUNTIME_DIR}"
+    fi
+
+    # Link the runtime copy to where the system thinks it should be.
+    rm -f "${DIR}"
+    ln -s "${RUNTIME_DIR}" "${DIR}"
+
+done
+
+# Let 'er rip.
+exec supervisord --nodaemon --config /etc/supervisord.conf

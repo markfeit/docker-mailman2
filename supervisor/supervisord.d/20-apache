@@ -1,0 +1,16 @@
+# Apache Web Server
+
+# Source: http://jackmorrison.me/2015/02/23/controlling-apache-with-supervisor.html
+
+[program:apache]
+command=apachectl -c "ErrorLog /dev/stdout" -DFOREGROUND
+autostart=true
+autorestart=true
+startretries=1
+startsecs=1
+redirect_stderr=true
+stdout_logfile=/var/log/apache.out.log
+user=root
+killasgroup=true
+stopasgroup=true
+priority=20
