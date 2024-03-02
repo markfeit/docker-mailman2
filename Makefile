@@ -22,7 +22,7 @@ SUPERVISED := 1
 # Additional arguments to pass to docker run
 RUN_ARGS := \
 	--volume=/home/mfeit/hole/mailman-data:/mailman \
-	--volume=/home/mfeit/work/mailman-docker:/work
+	--volume=/home/mfeit/work/docker-mailman2:/work
 ## TODO: --publish=1234:1234
 ## TODO: Remove share of /work
 
@@ -99,7 +99,7 @@ release:
 
 # Start a shell to the container if it's running.
 shell sh:
-	@docker exec -it `docker ps | awk -v "NAME=$(NAME)" '$$2 == NAME { print $$1 }'` sh
+	@docker exec -it `docker ps | awk -v "NAME=localhost/$(NAME):latest" '$$2 == NAME { print $$1 }'` sh
 
 
 # Get rid of build by-products
