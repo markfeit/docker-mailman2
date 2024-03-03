@@ -19,7 +19,8 @@ FROM := oraclelinux:8-slim
 # execute app/run instead.
 SUPERVISED := 1
 
-# Additional arguments to pass to docker run
+# Additional arguments to pass to docker run.  You'll want to change
+# these to suit your system.
 RUN_ARGS := \
 	--name=mailman.notonthe.net \
 	--hostname=mailman.notonthe.net \
@@ -39,10 +40,10 @@ $(error Invalid characters in NAME.  No . or .. allowed.)
 endif
 
 
-default: run
-
 DOCKERFILE=Dockerfile
 DOCKERFILE_PARTS=$(DOCKERFILE).d
+
+default: $(DOCKERFILE)
 
 $(DOCKERFILE)::
 	@echo '#'

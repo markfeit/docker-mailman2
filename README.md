@@ -13,6 +13,16 @@ Throughout this document, the directory on the where all
 mailman-related files are placed will be referred to as
 `/system/mailman`.
 
+## Build and Test
+
+To build the container's `Dockerfile`, run `make`.
+
+The `run` target will build and run the container in the foreground
+and the `shell` target will start an interactive shell on it.
+
+This container will be available on the GitHub Container Repository in
+the near future.
+
 
 ## Docker
 
@@ -34,9 +44,14 @@ docker run \
 ```
 services:
 
-  docker-template:
+  mailman2:
     image: markfeit/mailman2
-    # TODO:  ...etc...
+    name: mailman.example.com
+    hostname: mailman.example.com
+    ports:
+      - '9999:80'
+    volumes:
+      - /system/mailman:/mailman
 ```
 
 ## Container Configuration
@@ -101,21 +116,21 @@ DELIVERY_MODULE = 'SMTPDirect'
 SMTPHOST = 'mailout.example.com'
 ```
 
-### Log Rotation
-
-TODO: Not implemented yet.
-
 ## Host Configuration
+
+The following will need to be configured on the host:
 
 ### Web Server
 
 The host's web server must be configured as a proxy to send requests
-into port `80` on the container (e.g., with `--publish 9999:80`).
+into the container's port 80 via another port (e.g., with `--publish
+9999:80`).
 
-Nore that the container **does not provide HTTPS**.
+Note that the container **does not provide HTTPS**.
 
 A sample configuration for Apache is provided in
 `scripts/apache-host.conf`.
+
 
 ### Mail Server
 
@@ -147,3 +162,8 @@ Cmnd_Alias MAILMAN_CONTAINER=/system/mailman/bin/mailman-root *
 mailnull ALL=(root:root) NOPASSWD:MAILMAN_CONTAINER
 Defaults!MAILMAN_CONTAINER !requiretty
 ```
+
+### Log Rotation
+
+Logs are not currently rotated.  That and external configuration may
+be a feature in a future release.
