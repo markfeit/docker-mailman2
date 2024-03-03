@@ -92,7 +92,7 @@ TOP=$(dirname "$0")/..
 CONTAINER=$(cat "${TOP}/var/run/mailman/container")
 CONTAINER_NAME=$(cat "${TOP}/var/run/mailman/container-name")
 
-exec "${CONTAINER}" exec -it "${CONTAINER_NAME}" \
+exec "${CONTAINER}" exec -i "${CONTAINER_NAME}" \
      su - mailman \
      -c "/usr/lib/mailman/mail/mailman '$1' '$2'"
 EOF

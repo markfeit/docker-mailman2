@@ -84,10 +84,9 @@ Configuration_, below.  <!-- TODO: Link. -->
 ### Mailman Configuration
 
 Generally, the default configuration (`etc/mailman/mm_cf.py`) should
-be used with only minor modifications:
+be used with minor modifications:
 
 ```
-
 # Set this to the domain where emails should be sent, used in the
 # contact information on the listinfo page.
 DEFAULT_EMAIL_HOST = 'example.com'
@@ -95,6 +94,11 @@ DEFAULT_EMAIL_HOST = 'example.com'
 # Show all public lists regardless of whether or not the host names
 # match.
 VIRTUAL_HOST_OVERVIEW = Off
+
+# How and where to send outbound emails because the container does not
+# run a MTA of its own.
+DELIVERY_MODULE = 'SMTPDirect'
+SMTPHOST = 'mailout.example.com'
 ```
 
 ### Log Rotation
