@@ -20,7 +20,8 @@ for DIR in \
     /var/lock/mailman \
     /var/run/mailman \
     /var/spool/mailman \
-    /var/log/httpd
+    /var/log/httpd \
+    /var/log/mailman
 do
     DIST_DIR="${DIR}-dist"
     RUNTIME_DIR="${RUNTIME}${DIR}"
@@ -38,6 +39,11 @@ do
     # Link the runtime copy to where the system thinks it should be.
     rm -f "${DIR}"
     ln -s "${RUNTIME_DIR}" "${DIR}"
+
+    if echo "${DIR}" | egrep -q -e '/mailman$'
+    then
+	chown -R mailman.mailman "${RUNTIME_DIR}"
+    fi
 
 done
 

@@ -21,10 +21,9 @@ SUPERVISED := 1
 
 # Additional arguments to pass to docker run
 RUN_ARGS := \
-	--volume=/home/mfeit/hole/mailman-data:/mailman \
-	--volume=/home/mfeit/work/docker-mailman2:/work
-## TODO: --publish=1234:1234
-## TODO: Remove share of /work
+	--volume=/system/mailman:/mailman \
+	--publish=21044:80
+
 
 #
 # No user-serviceable parts beyond this point.
@@ -59,7 +58,7 @@ else
 	rm -f $(DOCKERFILE_PARTS)/98-supervisor
 	ln -s ../app/Dockerfile $(DOCKERFILE_PARTS)/98-app
 endif
-	find -L $(DOCKERFILE_PARTS) -type f -print \
+	find -L $(DOCKERFILE_PARTS) -type f ! -name '.??*' -print \
 	| sort \
 	| xargs cat \
 	> $@

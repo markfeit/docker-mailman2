@@ -1,0 +1,5 @@
+#
+# Apache Web Server
+#
+
+EXPOSE 80/tcp

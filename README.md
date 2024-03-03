@@ -62,12 +62,12 @@ services:
 
 ### The `/mailman` Volume
 
-The host must mount a volume onto the container's `/mailman` which
-contains all persistent Mailman data.  If the directory is empty, the
-container will initialize it with defaults.
+The container requires that the host provide a single shared directory
+mounted on `/mailman` to hold all persistent data, logs and locks.
 
-<!-- TODO: Probably doesn't need customizing -->
-<!-- /etc/httpd/conf.d/mailman.conf -->
+During boot, the container will initialize any missing directories
+with defaults from the Mailman build.  This allows existing Mailman
+installations to be migrated to this container
 
 Generally, the structure of the directory is as follows:
 
@@ -77,7 +77,7 @@ Generally, the structure of the directory is as follows:
 |   `-- mailman/
 |       |-- mm_cfg.py
 |       |-- sitelist.cfg
-|       `-- templates/
+|       `-- templates/...
 `-- var/
     |-- lib/
     |   `-- mailman/
@@ -87,11 +87,9 @@ Generally, the structure of the directory is as follows:
     |       |-- data/
     |       |-- lists/
     |       `-- spam/
-    |-- lock/
-    |   `-- mailman/
     |-- run/
     |   `-- mailman/
-    |-- spool/
+    `-- spool/
         `-- mailman/
 ```
 

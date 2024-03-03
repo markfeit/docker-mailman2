@@ -18,5 +18,5 @@ RUN rm -rf /etc/supervisord.conf /etc/supervisord.d
 RUN ln -s $(pwd)/supervisor/supervisord.conf /etc/supervisord.conf
 RUN ln -s $(pwd)/supervisor/supervisord.d /etc/supervisord.d
 
-COPY docker-entrypoint /
+COPY scripts/docker-entrypoint /
 ENTRYPOINT /docker-entrypoint

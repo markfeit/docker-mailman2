@@ -8,6 +8,14 @@ RUN microdnf -y install mailman rsyslog
 
 VOLUME /mailman
 
-COPY scripts/prep-mailman-build /tmp
-RUN /tmp/prep-mailman-build \
-    && rm -f /tmp/prep-mailman-build
+COPY scripts/prep /tmp
+RUN /tmp/prep \
+    && rm -f /tmp/prep
+
+COPY scripts/run-mailman /usr/bin
+
+RUN rm -f \
+    /etc/httpd/conf.d/welcome.conf \
+    /etc/httpd/conf.d/mailman.conf
+COPY scripts/mailman-root.conf /etc/httpd/conf.d
+COPY scripts/mailman.conf /etc/httpd/conf.d

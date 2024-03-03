@@ -15,7 +15,8 @@ for DIR in \
     /var/lock/mailman \
     /var/run/mailman \
     /var/spool/mailman \
-    /var/log/httpd
+    /var/log/httpd \
+    /var/log/mailman
 do
     DIST="${DIR}-dist"
     if [ ! -e "${DIST}" ]
