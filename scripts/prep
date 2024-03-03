@@ -9,14 +9,16 @@ die()
     exit 1
 }
 
+# TODO: This list should come from a common source.  Docker-entrypoint
+# uses it, too.
+
 for DIR in \
     /etc/mailman \
     /var/lib/mailman \
-    /var/lock/mailman \
-    /var/run/mailman \
-    /var/spool/mailman \
     /var/log/httpd \
-    /var/log/mailman
+    /var/log/mailman \
+    /var/run/mailman \
+    /var/spool/mailman
 do
     DIST="${DIR}-dist"
     if [ ! -e "${DIST}" ]
@@ -29,4 +31,10 @@ done
 
 
 # Let the web server do mailman things
-usermod apache -G mailman
+usermod -G mailman apache
+
+# Unlock the mailman account so it can be su'd to.
+usermod \
+    --password '*' \
+    --shell '/bin/bash' \
+    mailman

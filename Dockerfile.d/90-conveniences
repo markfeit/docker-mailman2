@@ -4,7 +4,5 @@
 
 # This will comaplain about not having access to systemd.  Ignore it.
 
-RUN microdnf -y install less tree procps
+RUN microdnf -y install findutils less tree procps
 
-# TODO: Remove this after development.
-VOLUME /work

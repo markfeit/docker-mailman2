@@ -14,6 +14,8 @@ echo "Starting Mailman"
 mailman-update-cfg
 mailmanctl -s start
 
+# TODO: Check if this gets run when the container is stopped.
+
 stop_mailman()
 {
     echo "Stopping Mailman"

@@ -21,6 +21,8 @@ SUPERVISED := 1
 
 # Additional arguments to pass to docker run
 RUN_ARGS := \
+	--name=mailman.notonthe.net \
+	--hostname=mailman.notonthe.net \
 	--volume=/system/mailman:/mailman \
 	--publish=21044:80
 

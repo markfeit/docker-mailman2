@@ -1,51 +1,32 @@
-# Generic Docker Template
+# Mailman 2 Container
 
+This container runs [GNU Mailman](https://list.org/) 2.x with all
+persistent data in a single host directory.
 
-This directory contains a generic template for building Docker
-containers.
+This container is based on Oracle Linux 8, which is the last-surviving
+distribution which is stil supported by the distributor.  **Regular
+support ends on July 1, 2029 and extended support ends July 1, 2031.
+Use of this container is not recommended or supported after those
+dates.**
 
-## Setup Instructions
+Throughout this document, the directory on the where all
+mailman-related files are placed will be referred to as
+`/system/mailman`.
 
-Edit the `Makefile` and adjust the variables in the top section as
-directed.
-
-If the `SUPERVISED` variable in the `Makefile` is undefined
-(commented), edit `app/Dockerfile` to do anything
-application-specific.
-
-If the `SUPERVISED` variable in the `Makefile` is defined
-(uncommented), add supervisord configuration files to
-`supervisor/supervisor.d`.
-
-Add any additional files containing Docker commands you want executed
-in `Dockerfile.d`.  Each file should have a name beginning with a
-two-digit number between `01` and `97` and a hyphen (e.g.,
-`86-the-fish`).  The numbers `00`, `98` and `99` are used by the
-template and should not be used.  The `Dockerfile` will be built from
-these files sorted into numeric and then alphabetical order.
-
-To build the container and run it interactively, run `make`.
-
-To start a shell into a running container from another terminal, run
-`make shell`.
-
-To remove all build by-products run `make clean`.  Note that this does
-not remove the built image from Docker.
-
-When ready to commit a finished product to GitHub, run `make release`
-to generate a `Dockerfile`.
-
-Replace this file with everything below this line and fill in its
-contents:
-
----
-
-# Docker Container Template
 
 ## Docker
 
+**NOTE:** It is recommended (but not required) that the container's
+   name and hostname be the same as the FQDN of the mailman web
+   server's URL.  See below.  <!-- TODO: Link. -->
+
 ```
-docker run markfeit/docker-mailman:latest
+docker run \
+    --name=mailman.example.com \
+    --hostname=mailman.example.com \
+    --volume=/system/mailman:/mailman \
+    --publish=9999:80 \
+    markfeit/mailman2
 ```
 
 ## Docker Compose
@@ -54,25 +35,22 @@ docker run markfeit/docker-mailman:latest
 services:
 
   docker-template:
-    image: markfeit/docker-mailman:latest
-    # ...etc...
+    image: markfeit/mailman2
+    # TODO:  ...etc...
 ```
 
-## Configuration
+## Container Configuration
 
 ### The `/mailman` Volume
 
 The container requires that the host provide a single shared directory
-mounted on `/mailman` to hold all persistent data, logs and locks.
-
-During boot, the container will initialize any missing directories
-with defaults from the Mailman build.  This allows existing Mailman
-installations to be migrated to this container
-
-Generally, the structure of the directory is as follows:
+mounted on its `/mailman` to hold all persistent data, logs and locks.
+The arrangement of this directory generally mirrors that of a system
+running Mailman:
 
 ```
 /mailman/
+|-- bin/   (See note below)
 |-- etc/
 |   `-- mailman/
 |       |-- mm_cfg.py
@@ -93,9 +71,75 @@ Generally, the structure of the directory is as follows:
         `-- mailman/
 ```
 
+During boot, the container will initialize any missing directories
+with the defaults provided by the container's installed Mailman.  This
+allows existing Mailman 2.x installations to be migrated to this
+container.
 
-## Notes
+The `bin` directory will be configured by the container with a program
+used on the host to send incoming mail into Mailman.  See _Host
+Configuration_, below.  <!-- TODO: Link. -->
 
-Some inspiration taken from:
 
- * https://github.com/macropin/docker-mailman
+### Mailman Configuration
+
+Generally, the default configuration (`etc/mailman/mm_cf.py`) should
+be used with only minor modifications:
+
+```
+
+# Set this to the domain where emails should be sent, used in the
+# contact information on the listinfo page.
+DEFAULT_EMAIL_HOST = 'example.com'
+
+# Show all public lists regardless of whether or not the host names
+# match.
+VIRTUAL_HOST_OVERVIEW = Off
+```
+
+### Log Rotation
+
+TODO: Not implemented yet.
+
+## Host Configuration
+
+### Web Server
+
+The host's web server must be configured as a proxy to send requests
+into port `80` on the container (e.g., with `--publish 9999:80`).
+
+Nore that the container **does not provide HTTPS**.
+
+A sample configuration for Apache is provided in
+`scripts/apache-host.conf`.
+
+### Mail Server
+
+#### Postifx and Sendmail
+
+```
+listname:             "|/system/mailman/bin/mailman post listname"
+listname-admin:       "|/system/mailman/bin/mailman admin listname"
+listname-bounces:     "|/system/mailman/bin/mailman bounces listname"
+listname-confirm:     "|/system/mailman/bin/mailman confirm listname"
+listname-join:        "|/system/mailman/bin/mailman join listname"
+listname-leave:       "|/system/mailman/bin/mailman leave listname"
+listname-owner:       "|/system/mailman/bin/mailman owner listname"
+listname-request:     "|/system/mailman/bin/mailman request listname"
+listname-subscribe:   "|/system/mailman/bin/mailman subscribe listname"
+listname-unsubscribe: "|/system/mailman/bin/mailman unsubscribe listname"
+```
+
+#### sudo
+
+Configure `sudo` to allow your mail agent to inject mail into the
+container via a Docker command.  The program cited below is the
+wrapped half of a pair that the unwrapped half runs with `sudo`.
+
+```
+# Sudoers for Mailman container wrapper
+
+Cmnd_Alias MAILMAN_CONTAINER=/system/mailman/bin/mailman-root *
+mailnull ALL=(root:root) NOPASSWD:MAILMAN_CONTAINER
+Defaults!MAILMAN_CONTAINER !requiretty
+```

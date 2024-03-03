@@ -14,14 +14,16 @@ die()
 
 echo "Setting up ${RUNTIME}"
 
+# TODO: This list should come from a common source.  Prep uses it,
+# too.
+
 for DIR in \
     /etc/mailman \
     /var/lib/mailman \
-    /var/lock/mailman \
-    /var/run/mailman \
-    /var/spool/mailman \
     /var/log/httpd \
-    /var/log/mailman
+    /var/log/mailman \
+    /var/run/mailman \
+    /var/spool/mailman
 do
     DIST_DIR="${DIR}-dist"
     RUNTIME_DIR="${RUNTIME}${DIR}"
@@ -46,6 +48,60 @@ do
     fi
 
 done
+
+
+# Leave breadcrumbs so the host knows how to get to the container.
+
+RUN="${RUNTIME}/var/run/mailman"
+rm -f "${RUN}/container" "${RUN}/container-name"
+echo "${container}" > "${RUN}/container"
+echo "${HOSTNAME}" > "${RUN}/container-name"
+chmod 444 "${RUN}/container" "${RUN}/container-name"
+
+
+# Set up both halves of the Mailman wrapper to be run on the host
+
+BIN="${RUNTIME}/bin"
+mkdir -p "${BIN}"
+chown root.root "${BIN}"
+chmod 655 "${BIN}"
+
+WRAPPER="${BIN}/mailman"
+rm -rf "${WRAPPER}"
+cat > "${WRAPPER}" <<'EOF'
+#!/bin/sh -e
+exec sudo "$(dirname $0)/mailman-root" "$@"
+EOF
+chown -R root.root "${WRAPPER}"
+chmod 555 "${WRAPPER}"
+echo Wrapper in "${WRAPPER}"
+
+WRAPPED="${BIN}/mailman-root"
+rm -rf "${WRAPPED}"
+cat > "${WRAPPED}" <<'EOF'
+#!/bin/sh -e
+
+if [ $# -ne 2 ]
+then
+    echo "Usage: $(basename "$0") COMMAND LIST-NAME" 1>&2
+    exit 1
+fi
+
+TOP=$(dirname "$0")/..
+
+CONTAINER=$(cat "${TOP}/var/run/mailman/container")
+CONTAINER_NAME=$(cat "${TOP}/var/run/mailman/container-name")
+
+exec "${CONTAINER}" exec -it "${CONTAINER_NAME}" \
+     su - mailman \
+     -c "/usr/lib/mailman/mail/mailman '$1' '$2'"
+EOF
+chown -R root.root "${WRAPPED}"
+chmod 555 "${WRAPPED}"
+echo Wrapped in "${WRAPPED}"
+
+# Make sure all list URLs are good
+/usr/lib/mailman/bin/withlist -l -a -r fix_url -- -v
 
 # Let 'er rip.
 exec supervisord --nodaemon --config /etc/supervisord.conf
