@@ -9,9 +9,10 @@ support ends on July 1, 2029 and extended support ends July 1, 2031.
 Use of this container is not recommended or supported after those
 dates.**
 
-Throughout this document, the directory on the where all
+Throughout this document, the host directory on the where all
 mailman-related files are placed will be referred to as
 `/system/mailman`.
+
 
 ## Build and Test
 
@@ -148,6 +149,8 @@ A sample configuration for Apache is provided in
 
 #### Postifx and Sendmail
 
+List aliases should be configured to use the container's wrapper:
+
 ```
 listname:             "|/system/mailman/bin/mailman post listname"
 listname-admin:       "|/system/mailman/bin/mailman admin listname"
@@ -161,7 +164,8 @@ listname-subscribe:   "|/system/mailman/bin/mailman subscribe listname"
 listname-unsubscribe: "|/system/mailman/bin/mailman unsubscribe listname"
 ```
 
-#### sudo
+
+### sudo
 
 Configure `sudo` to allow your mail agent to inject mail into the
 container via a Docker command.  The program cited below is the
@@ -169,11 +173,13 @@ wrapped half of a pair that the unwrapped half runs with `sudo`.
 
 ```
 # Sudoers for Mailman container wrapper
+# Recommended location is /etc/sudoers.d/mailman-container
 
 Cmnd_Alias MAILMAN_CONTAINER=/system/mailman/bin/mailman-root *
 mailnull ALL=(root:root) NOPASSWD:MAILMAN_CONTAINER
 Defaults!MAILMAN_CONTAINER !requiretty
 ```
+
 
 ### Log Rotation
 
