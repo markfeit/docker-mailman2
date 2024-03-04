@@ -99,22 +99,34 @@ Configuration_, below.  <!-- TODO: Link. -->
 ### Mailman Configuration
 
 Generally, the default configuration (`etc/mailman/mm_cf.py`) should
-be used with minor modifications:
+be used with these modifications:
 
 ```
 # Set this to the domain where emails should be sent, used in the
-# contact information on the listinfo page.
+# contact information on the listinfo page (e.g.,
+# mailman@example.com).
 DEFAULT_EMAIL_HOST = 'example.com'
 
 # Show all public lists regardless of whether or not the host names
 # match.
 VIRTUAL_HOST_OVERVIEW = Off
 
+# Host in the URL by which the proxy is accessed (e.g.,
+# https://mailman.example.com)
+DEFAULT_URL_HOST   = 'mailman.example.com'
+
+# Enable this if access to the proxy is via HTTPS
+DEFAULT_URL_PATTERN = 'https://%s'
+
 # How and where to send outbound emails because the container does not
 # run a MTA of its own.
 DELIVERY_MODULE = 'SMTPDirect'
 SMTPHOST = 'mailout.example.com'
 ```
+
+Note that URLs for all mailing lists will be automatically adjusted to
+reflect this configuration when the container starts.
+
 
 ## Host Configuration
 
